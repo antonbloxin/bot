@@ -2,7 +2,7 @@ import logging
 import os
 import asyncio
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
+from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters, CallbackQueryHandler
 
 # Enable logging
 logging.basicConfig(
@@ -12,6 +12,22 @@ logging.basicConfig(
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
+
+# Обработчик нажатия кнопок
+async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Обработка нажатий на кнопки."""
+    query = update.callback_query
+    await query.answer()  # Подтверждаем нажатие кнопки
+    
+    if query.data == "watch_video":
+        # Отправляем сообщение с описанием и ссылкой
+        await query.message.reply_text(
+            "ГК Новые термы занимается комплексно разработкой и реализацией высокодоходных инвестиционных проектов в сфере термальных комплексов по всей России.\n\n"
+            "Наша цель - это создание экосистемы, состоящей из 300 термальных комплексов и IT-инфраструктуры через создание сбалансированной и взаимовыгодной системы отношений инвесторов, команды и гостей.\n\n"
+            "Эта работа не ограничивается лишь цифрами и проектами; она заключается в создании ценности для общества, улучшении качества жизни людей и формировании новой структуры отдыха.\n\n"
+            "Подробнее о наших проектах, целях и кейсах смотрите в презентации генерального директора Александра Рудакова.\n\n"
+            "Ссылка на видео: https://rutube.ru/video/3ac6026b1823bc07e3159736102caae1/"
+        )
 
 # Define a few command handlers. These usually take the two arguments update and
 # context.
@@ -60,6 +76,9 @@ def main() -> None:
 
     # on non command i.e message - echo the message on Telegram
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
+
+    # Обработка нажатий кнопок
+    application.add_handler(CallbackQueryHandler(button))
 
     # Run the bot until the user presses Ctrl-C
     application.run_polling(allowed_updates=Update.ALL_TYPES)
