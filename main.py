@@ -28,6 +28,11 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             "Подробнее о наших проектах, целях и кейсах смотрите в презентации генерального директора Александра Рудакова.\n\n"
             "Ссылка на видео: https://rutube.ru/video/3ac6026b1823bc07e3159736102caae1/"
         )
+    
+    elif query.data == "get_presentation":
+        # Отправляем PDF-файл с презентацией
+        pdf_path = "Present_300term.pdf"  # Укажите путь к файлу PDF
+        await query.message.reply_document(open(pdf_path, "rb"), caption="Презентация 300 Терм")
 
 # Define a few command handlers. These usually take the two arguments update and
 # context.
@@ -36,8 +41,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # Приветственное сообщение
     await update.message.reply_text("🏛️ Я Гермес! Бот проекта 300 Терм. Помогу вам получить нужные материалы.")
     
-    # Задержка 3 секунды перед отправкой меню
-    await asyncio.sleep(3)
+    # Задержка 2 секунды перед отправкой меню
+    await asyncio.sleep(2)
 
     # Определение кнопок для меню
     keyboard = [
