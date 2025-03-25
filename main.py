@@ -1,82 +1,39 @@
-import os
 import asyncio
-from telegram import Update, ReplyKeyboardMarkup
-from telegram.ext import Application, CommandHandler, MessageHandler, filters
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import Application, CommandHandler, ContextTypes
 
-bot = Bot(token="7622349875:AAFCIO5bZ0qddUQnBVMCuysXMbuAGXLLVTs")
-
-# Функция для отправки приветствия и меню с задержкой
-async def start(update: Update, context):
+async def start(update: Update, context) -> None:
+    # Отправляем приветственное сообщение
     await update.message.reply_text("🏛️ Я Гермес! Бот проекта 300 Терм. Помогу вам получить нужные материалы.")
 
     # Задержка 3 секунды перед отправкой меню
     await asyncio.sleep(3)
 
+    # Определяем кнопки меню
     keyboard = [
-        ["📄 Получить КП", "📑 Получить Техусловия"],
-        ["📊 Получить Презентацию", "🎥 Посмотреть Видео"],
-        ["📂 Посмотреть кейсы", "📞 Контакты"]
+        [InlineKeyboardButton("📄 Получить КП", callback_data='get_kp')],
+        [InlineKeyboardButton("📑 Получить Техусловия", callback_data='get_tech')],
+        [InlineKeyboardButton("📊 Получить Презентацию", callback_data='get_presentation')],
+        [InlineKeyboardButton("🎥 Посмотреть Видео", callback_data='watch_video')],
+        [InlineKeyboardButton("📂 Посмотреть кейсы", callback_data='view_cases')],
+        [InlineKeyboardButton("📞 Контакты", callback_data='contacts')]
     ]
-    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
-    await update.message.reply_text("👇 Выберите интересующий раздел:", reply_markup=reply_markup)
+    # Создаем разметку для меню
+    reply_markup = InlineKeyboardMarkup(keyboard)
 
-# Функция обработки кнопок
-async def handle_message(update: Update, context):
-    text = update.message.text
+    # Отправляем меню пользователю
+    await update.message.reply_text("Выберите опцию:", reply_markup=reply_markup)
 
-    if text == "📄 Получить КП":
-        try:
-            with open("kp.pdf", "rb") as doc:
-                await update.message.reply_document(doc, caption="📄 Вот актуальное КП.")
-        except FileNotFoundError:
-            await update.message.reply_text("❌ Ошибка: файл КП не найден!")
+def main() -> None:
+    """Start the bot."""
+    application = Application.builder().token("YOUR_BOT_TOKEN").build()
 
-    elif text == "📑 Получить Техусловия":
-        try:
-            with open("tech_usloviya.pdf", "rb") as doc:
-                await update.message.reply_document(doc, caption="📑 Вот технические условия.")
-        except FileNotFoundError:
-            await update.message.reply_text("❌ Ошибка: файл техусловий не найден!")
+    # on /start command - trigger the start function
+    application.add_handler(CommandHandler("start", start))
 
-    elif text == "📊 Получить Презентацию":
-        try:
-            with open("presentation.pdf", "rb") as doc:
-                await update.message.reply_document(doc, caption="📊 Вот презентация проекта.")
-        except FileNotFoundError:
-            await update.message.reply_text("❌ Ошибка: файл презентации не найден!")
-
-    elif text == "🎥 Посмотреть Видео":
-        await update.message.reply_text(
-            "🎥 Видео о проекте: [Посмотреть на YouTube](https://www.youtube.com/)", 
-            parse_mode="Markdown"
-        )
-
-    elif text == "📂 Посмотреть кейсы":
-        try:
-            with open("cases.pdf", "rb") as doc:
-                await update.message.reply_document(doc, caption="📂 Вот кейсы проекта.")
-        except FileNotFoundError:
-            await update.message.reply_text("❌ Ошибка: файл кейсов не найден!")
-
-    elif text == "📞 Контакты":
-        await update.message.reply_text(
-            "📧 Email: info@300term.ru\n📞 Телефон: +7 (999) 123-45-67\n🌐 Сайт: [300 Терм](https://300term.ru)",
-            parse_mode="Markdown"
-        )
-
-    else:
-        await update.message.reply_text("Я не понял команду. Выберите пункт меню! 👇")
-
-# Запуск бота
-def main():
-    app = Application.builder().token(TOKEN).build()
-
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-
-    print("Бот запущен...")
-    app.run_polling()
+    # Run the bot until the user presses Ctrl-C
+    application.run_polling()
 
 if __name__ == "__main__":
     main()
