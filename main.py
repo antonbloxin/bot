@@ -28,8 +28,8 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await query.message.reply_document(open(pdf_path, "rb"), caption="Презентация 300 Терм")
     
     elif query.data == "get_kp":
-        kp_path = "KP.Termokomplektov.pdf"
-        await query.message.reply_document(open(kp_path, "rb"), caption="Коммерческое предложение ТермоКомплектов")
+        kp_path = "KP_Termokomplektov.pdf"
+        await query.message.reply_document(open(kp_path, "rb"), caption="Коммерческое предложение Термокомплектов")
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text("🏛️ Я Гермес! Бот проекта 300 Терм. Помогу вам получить нужные материалы.")
