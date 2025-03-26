@@ -28,7 +28,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await query.message.reply_document(open(pdf_path, "rb"), caption="Презентация 300 Терм")
     
     elif query.data == "get_kp":
-        kp_path = "KP.Termokomplektov.pdf"
+        kp_path = "KP_Termokomplektov.pdf"
         await query.message.reply_document(open(kp_path, "rb"), caption="Коммерческое предложение ТермоКомплектов")
     
     elif query.data == "get_tech":
