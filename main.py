@@ -25,14 +25,17 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     
     elif query.data == "get_presentation":
         pdf_path = "Present_300term.pdf"
+        await query.message.reply_text("Одну секунду... Загружаю")
         await query.message.reply_document(open(pdf_path, "rb"), caption="Презентация 300 Терм")
     
     elif query.data == "get_kp":
         kp_path = "KP_Termokomplektov.pdf"
+        await query.message.reply_text("Одну секунду... Загружаю")
         await query.message.reply_document(open(kp_path, "rb"), caption="Коммерческое предложение ТермоКомплектов")
     
     elif query.data == "get_tech":
         tech_path = "Tekhnicheskiye_usloviya.pdf"
+        await query.message.reply_text("Одну секунду... Загружаю")
         await query.message.reply_document(open(tech_path, "rb"), caption="Технические условия")
     
     elif query.data == "contacts":
