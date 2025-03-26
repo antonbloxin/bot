@@ -13,17 +13,17 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
-# FILE_ID моего стикера
+# FILE_ID моего стикера (замени на актуальный)
 STICKER_ID = "CAACAgIAAxkBAAEN0kVn5DosnEUsvrIq3qMijI-UH06IRwAChXkAAtiRIEslui9KsGyRWzYE"
 
 # Файл для хранения статистики
 STATS_FILE = "bot_stats.json"
 
-# Мой Telegram ID 
+# Мой Telegram ID
 ADMIN_ID = 1059405288
 
 # Функция обновления статистики
-def update_stats(user_id, action):
+def update_stats(user_id, username, action):
     try:
         if os.path.exists(STATS_FILE):
             with open(STATS_FILE, "r", encoding="utf-8") as file:
@@ -32,7 +32,7 @@ def update_stats(user_id, action):
             stats = {}
 
         if str(user_id) not in stats:
-            stats[str(user_id)] = {"total_interactions": 0, "actions": {}}
+            stats[str(user_id)] = {"username": username, "total_interactions": 0, "actions": {}}
 
         stats[str(user_id)]["total_interactions"] += 1
         stats[str(user_id)]["actions"][action] = stats[str(user_id)]["actions"].get(action, 0) + 1
@@ -59,17 +59,26 @@ async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     total_users = len(stats)
     total_interactions = sum(user["total_interactions"] for user in stats.values())
     
-    message = f"📊 Общая статистика:\n👤 Пользователей: {total_users}\n📈 Всего взаимодействий: {total_interactions}\n"
+    message = f"📊 Общая статистика:\n👤 Пользователей: {total_users}\n📈 Всего взаимодействий: {total_interactions}\n\n"
+    
+    for user_id, data in stats.items():
+        username = data["username"] if data["username"] else "(Нет никнейма)"
+        message += f"👤 @{username} (ID: {user_id})\n🔄 Всего действий: {data['total_interactions']}\n"
+        for action, count in data["actions"].items():
+            message += f"   🔹 {action}: {count}\n"
+        message += "\n"
+    
     await update.message.reply_text(message)
 
 # Обработчик нажатия кнопок
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     user_id = query.from_user.id
+    username = query.from_user.username or "(Нет никнейма)"
     action = query.data
     
     await query.answer()
-    update_stats(user_id, action)
+    update_stats(user_id, username, action)
 
     if action == "watch_video":
         await query.message.reply_text(
@@ -93,7 +102,8 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id = update.message.from_user.id
-    update_stats(user_id, "start")
+    username = update.message.from_user.username or "(Нет никнейма)"
+    update_stats(user_id, username, "start")
 
     await update.message.reply_sticker(STICKER_ID)
     await asyncio.sleep(1)
