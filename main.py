@@ -39,7 +39,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await query.message.reply_text(
             "📞 Контакты:\n📧 Почта: delo@300term.ru\n📱 Телефон: +7 910-640 65 30"
         )
-
+    
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text("🏛️ Я Гермес! Бот проекта 300 Терм. Помогу вам получить нужные материалы.")
     await asyncio.sleep(2)
@@ -48,7 +48,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         [InlineKeyboardButton("📑 Получить Техусловия", callback_data='get_tech')],
         [InlineKeyboardButton("📊 Получить Презентацию", callback_data='get_presentation')],
         [InlineKeyboardButton("🎥 Посмотреть Видео", callback_data='watch_video')],
-        [InlineKeyboardButton("📂 Посмотреть кейсы", callback_data='view_cases')],
+        [InlineKeyboardButton("📢 Подписаться на канал", url="https://t.me/termsnew")],
         [InlineKeyboardButton("📞 Контакты", callback_data='contacts')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
