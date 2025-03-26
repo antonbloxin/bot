@@ -53,6 +53,41 @@ async def broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             logger.error(f"Не удалось отправить сообщение {user_id}: {e}")
     
     await update.message.reply_text(f"✅ Сообщение отправлено {sent_count} пользователям.")
+    
+# Команда /delete - удаление сообщений
+async def delete(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_id = update.message.from_user.id
+    if user_id != ADMIN_ID:
+        await update.message.reply_text("❌ У вас нет доступа к этой команде.")
+        return
+
+    if not context.args:
+        await update.message.reply_text("⚠️ Используйте: /delete [message_id]")
+        return
+
+    message_id = context.args[0]
+    
+    if not os.path.exists(MESSAGES_FILE):
+        await update.message.reply_text("Нет сообщений для удаления.")
+        return
+
+    with open(MESSAGES_FILE, "r", encoding="utf-8") as file:
+        messages = json.load(file)
+
+    deleted_count = 0
+    for user_id, message_ids in messages.items():
+        if message_id in message_ids:
+            try:
+                await context.bot.delete_message(chat_id=int(user_id), message_id=int(message_id))
+                message_ids.remove(message_id)
+                deleted_count += 1
+            except Exception as e:
+                logger.error(f"Не удалось удалить сообщение {message_id} у {user_id}: {e}")
+    
+    with open(MESSAGES_FILE, "w", encoding="utf-8") as file:
+        json.dump(messages, file, indent=4, ensure_ascii=False)
+
+    await update.message.reply_text(f"✅ Сообщение {message_id} удалено у {deleted_count} пользователей.")
 
 # Команда /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -117,3 +152,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
