@@ -109,6 +109,31 @@ async def messageid(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     
     await update.message.reply_text(message_text)
 
+# Обработчик нажатия кнопок
+async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    user_id = query.from_user.id
+    username = query.from_user.username or "(Нет никнейма)"
+    action = query.data
+    
+    await query.answer()
+    update_stats(user_id, username, action)
+    
+    if action == "get_kp":
+        await query.message.reply_text("⏳ Одну секунду... Загружаю")
+        await query.message.reply_document(open("KP.Termokomplektov.pdf", "rb"), caption="Коммерческое предложение ТермоКомплектов")
+    elif action == "get_tech":
+        await query.message.reply_text("⏳ Одну секунду... Загружаю")
+        await query.message.reply_document(open("Tekhnicheskiye_usloviya.pdf", "rb"), caption="Технические условия")
+    elif action == "get_presentation":
+        await query.message.reply_text("⏳ Одну секунду... Загружаю")
+        await query.message.reply_document(open("Present_300term.pdf", "rb"), caption="Презентация 300 Терм")
+    elif action == "watch_video":
+        await query.message.reply_text("ГК Новые термы занимается комплексно разработкой и реализацией высокодоходных инвестиционных проектов...\nСсылка на видео: https://rutube.ru/video/3ac6026b1823bc07e3159736102caae1/")
+    elif action == "contacts":
+        await query.message.reply_text("📞 Контакты:\n📧 Почта: delo@300term.ru\n📱 Телефон: +7 910-640 65 30")
+
+
 
 # Команда /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
