@@ -24,6 +24,36 @@ MESSAGES_FILE = "sent_messages.json"
 # Твой Telegram ID (замени на свой)
 ADMIN_ID = 1059405288  # Укажи свой Telegram ID
 
+# Команда /broadcast - отправка сообщений всем пользователям (только для администратора)
+async def broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_id = update.message.from_user.id
+    if user_id != ADMIN_ID:
+        await update.message.reply_text("❌ У вас нет доступа к этой команде.")
+        return
+
+    if not context.args:
+        await update.message.reply_text("⚠️ Используйте: /broadcast [ваше сообщение]")
+        return
+
+    message_text = " ".join(context.args)
+    
+    if not os.path.exists(STATS_FILE):
+        await update.message.reply_text("Нет пользователей для рассылки.")
+        return
+
+    with open(STATS_FILE, "r", encoding="utf-8") as file:
+        stats = json.load(file)
+
+    sent_count = 0
+    for user_id in stats.keys():
+        try:
+            await context.bot.send_message(chat_id=int(user_id), text=message_text)
+            sent_count += 1
+        except Exception as e:
+            logger.error(f"Не удалось отправить сообщение {user_id}: {e}")
+    
+    await update.message.reply_text(f"✅ Сообщение отправлено {sent_count} пользователям.")
+
 # Команда /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id = update.message.from_user.id
