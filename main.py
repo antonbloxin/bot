@@ -89,6 +89,27 @@ async def delete(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     await update.message.reply_text(f"✅ Сообщение {message_id} удалено у {deleted_count} пользователей.")
 
+# Команда /messageid - получение списка отправленных сообщений
+async def messageid(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_id = update.message.from_user.id
+    if user_id != ADMIN_ID:
+        await update.message.reply_text("❌ У вас нет доступа к этой команде.")
+        return
+
+    if not os.path.exists(MESSAGES_FILE):
+        await update.message.reply_text("Нет сохранённых сообщений.")
+        return
+
+    with open(MESSAGES_FILE, "r", encoding="utf-8") as file:
+        messages = json.load(file)
+
+    message_text = "📨 Список отправленных сообщений:\n"
+    for user, msg_ids in messages.items():
+        message_text += f"👤 Пользователь {user}: {', '.join(map(str, msg_ids))}\n"
+    
+    await update.message.reply_text(message_text)
+
+
 # Команда /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id = update.message.from_user.id
