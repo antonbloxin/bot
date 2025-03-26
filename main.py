@@ -57,7 +57,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     
     if action == "get_kp":
         await query.message.reply_text("⏳ Одну секунду... Загружаю")
-        await query.message.reply_document(open("KP_Termokomplektov.pdf", "rb"), caption="Коммерческое предложение ТермоКомплектов")
+        await query.message.reply_document(open("KP.Termokomplektov.pdf", "rb"), caption="Коммерческое предложение ТермоКомплектов")
     elif action == "get_tech":
         await query.message.reply_text("⏳ Одну секунду... Загружаю")
         await query.message.reply_document(open("Tekhnicheskiye_usloviya.pdf", "rb"), caption="Технические условия")
