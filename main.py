@@ -2,8 +2,9 @@ import logging
 import os
 import asyncio
 import json
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, InputFile
-from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters, CallbackQueryHandler
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import Application, CommandHandler, ContextTypes, CallbackQueryHandler
+
 
 # Enable logging
 logging.basicConfig(
@@ -109,52 +110,60 @@ async def messageid(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     
     await update.message.reply_text(message_text)
 
-# Обработчик нажатия кнопок
+# Команда /start
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    try:
+        user_id = update.effective_user.id
+        username = update.effective_user.username or "(Нет никнейма)"
+        
+        await context.bot.send_sticker(chat_id=user_id, sticker=STICKER_ID)
+        await asyncio.sleep(1)
+        await context.bot.send_message(chat_id=user_id, text="🏛️ Я Гермес! Бот проекта 300 Терм. Помогу вам получить нужные материалы.")
+        await asyncio.sleep(2)
+        
+        keyboard = [
+            [InlineKeyboardButton("📄 Получить КП", callback_data='get_kp')],
+            [InlineKeyboardButton("📑 Получить Техусловия", callback_data='get_tech')],
+            [InlineKeyboardButton("📊 Получить Презентацию", callback_data='get_presentation')],
+            [InlineKeyboardButton("🎥 Посмотреть Видео", callback_data='watch_video')],
+            [InlineKeyboardButton("📢 Подписаться на канал", url="https://t.me/termsnew")],
+            [InlineKeyboardButton("📞 Контакты", callback_data='contacts')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await context.bot.send_message(chat_id=user_id, text="Выберите опцию:", reply_markup=reply_markup)
+    except Exception as e:
+        logger.error(f"Ошибка в start: {e}")
+
+# Обработчик кнопок
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
-    user_id = query.from_user.id
-    username = query.from_user.username or "(Нет никнейма)"
     action = query.data
     
     await query.answer()
-    update_stats(user_id, username, action)
     
     if action == "get_kp":
-        await query.message.reply_text("⏳ Одну секунду... Загружаю")
-        await query.message.reply_document(open("KP.Termokomplektov.pdf", "rb"), caption="Коммерческое предложение ТермоКомплектов")
+        await query.message.reply_text("⏳ Загружаю КП...")
     elif action == "get_tech":
-        await query.message.reply_text("⏳ Одну секунду... Загружаю")
-        await query.message.reply_document(open("Tekhnicheskiye_usloviya.pdf", "rb"), caption="Технические условия")
+        await query.message.reply_text("⏳ Загружаю технические условия...")
     elif action == "get_presentation":
-        await query.message.reply_text("⏳ Одну секунду... Загружаю")
-        await query.message.reply_document(open("Present_300term.pdf", "rb"), caption="Презентация 300 Терм")
+        await query.message.reply_text("⏳ Загружаю презентацию...")
     elif action == "watch_video":
-        await query.message.reply_text("ГК Новые термы занимается комплексно разработкой и реализацией высокодоходных инвестиционных проектов...\nСсылка на видео: https://rutube.ru/video/3ac6026b1823bc07e3159736102caae1/")
+        await query.message.reply_text("🎥 Ссылка на видео: https://rutube.ru/video/3ac6026b1823bc07e3159736102caae1/")
     elif action == "contacts":
-        await query.message.reply_text("📞 Контакты:\n📧 Почта: delo@300term.ru\n📱 Телефон: +7 910-640 65 30")
+        await query.message.reply_text("📞 Контакты: delo@300term.ru, +7 910-640 65 30")
+    
+# Запуск бота
+async def main() -> None:
+    application = Application.builder().token(os.environ.get("TOKEN")).build()
+    
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CallbackQueryHandler(button))
+    
+    await application.run_polling()
 
-
-
-# Команда /start
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    user_id = update.message.from_user.id
-    username = update.message.from_user.username or "(Нет никнейма)"
-    update_stats(user_id, username, "start")
-
-    await update.message.reply_sticker(STICKER_ID)
-    await asyncio.sleep(1)
-    await update.message.reply_text("🏛️ Я Гермес! Бот проекта 300 Терм. Помогу вам получить нужные материалы.")
-    await asyncio.sleep(2)
-    keyboard = [
-        [InlineKeyboardButton("📄 Получить КП", callback_data='get_kp')],
-        [InlineKeyboardButton("📑 Получить Техусловия", callback_data='get_tech')],
-        [InlineKeyboardButton("📊 Получить Презентацию", callback_data='get_presentation')],
-        [InlineKeyboardButton("🎥 Посмотреть Видео", callback_data='watch_video')],
-        [InlineKeyboardButton("📢 Подписаться на канал", url="https://t.me/termsnew")],
-        [InlineKeyboardButton("📞 Контакты", callback_data='contacts')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text("Выберите опцию:", reply_markup=reply_markup)
+if __name__ == "__main__":
+    asyncio.run(main())
 
 # Команда /stats
 async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
