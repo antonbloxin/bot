@@ -122,41 +122,50 @@ async def broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             logger.error(f"Не удалось отправить сообщение {user_id}: {e}")
     
     await update.message.reply_text(f"✅ Сообщение отправлено {sent_count} пользователям.")
-    
-# Команда /delete - удаление сообщений
+
+# Функция для сохранения ID последнего сообщения
+def save_last_message_id(message_id):
+    data = {"last_message_id": message_id}
+    with open(MESSAGES_FILE, "w", encoding="utf-8") as file:
+        json.dump(data, file, indent=4, ensure_ascii=False)
+
+# Функция для загрузки ID последнего сообщения
+def load_last_message_id():
+    if not os.path.exists(MESSAGES_FILE):
+        return None
+    with open(MESSAGES_FILE, "r", encoding="utf-8") as file:
+        data = json.load(file)
+        return data.get("last_message_id")
+
+# Команда /delete — удаление последнего сообщения
 async def delete(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id = update.message.from_user.id
     if user_id != ADMIN_ID:
         await update.message.reply_text("❌ У вас нет доступа к этой команде.")
         return
 
-    if not context.args:
-        await update.message.reply_text("⚠️ Используйте: /delete [message_id]")
+    last_message_id = load_last_message_id()
+    if not last_message_id:
+        await update.message.reply_text("⚠️ Нет сообщений для удаления.")
         return
 
-    message_id = context.args[0]
-    
-    if not os.path.exists(MESSAGES_FILE):
-        await update.message.reply_text("Нет сообщений для удаления.")
+    if not os.path.exists(STATS_FILE):
+        await update.message.reply_text("Нет пользователей для удаления сообщений.")
         return
 
-    with open(MESSAGES_FILE, "r", encoding="utf-8") as file:
-        messages = json.load(file)
+    with open(STATS_FILE, "r", encoding="utf-8") as file:
+        stats = json.load(file)
 
     deleted_count = 0
-    for user_id, message_ids in messages.items():
-        if message_id in message_ids:
-            try:
-                await context.bot.delete_message(chat_id=int(user_id), message_id=int(message_id))
-                message_ids.remove(message_id)
-                deleted_count += 1
-            except Exception as e:
-                logger.error(f"Не удалось удалить сообщение {message_id} у {user_id}: {e}")
-    
-    with open(MESSAGES_FILE, "w", encoding="utf-8") as file:
-        json.dump(messages, file, indent=4, ensure_ascii=False)
+    for user_id in stats.keys():
+        try:
+            await context.bot.delete_message(chat_id=int(user_id), message_id=int(last_message_id))
+            deleted_count += 1
+        except Exception as e:
+            logger.error(f"Не удалось удалить сообщение {last_message_id} у {user_id}: {e}")
 
-    await update.message.reply_text(f"✅ Сообщение {message_id} удалено у {deleted_count} пользователей.")
+    await update.message.reply_text(f"✅ Сообщение {last_message_id} удалено у {deleted_count} пользователей.")
+
 
 # Команда /stats
 async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -186,25 +195,6 @@ async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     
     await update.message.reply_text(message)
 
-# Команда /messageid - получение списка отправленных сообщений
-async def messageid(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    user_id = update.message.from_user.id
-    if user_id != ADMIN_ID:
-        await update.message.reply_text("❌ У вас нет доступа к этой команде.")
-        return
-
-    if not os.path.exists(MESSAGES_FILE):
-        await update.message.reply_text("Нет сохранённых сообщений.")
-        return
-
-    with open(MESSAGES_FILE, "r", encoding="utf-8") as file:
-        messages = json.load(file)
-
-    message_text = "📨 Список отправленных сообщений:\n"
-    for user, msg_ids in messages.items():
-        message_text += f"👤 Пользователь {user}: {', '.join(map(str, msg_ids))}\n"
-    
-    await update.message.reply_text(message_text)
 
 def main() -> None:
     application = Application.builder().token(
