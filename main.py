@@ -69,6 +69,34 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     elif action == "contacts":
         await query.message.reply_text("📞 Контакты:\n📧 Почта: delo@300term.ru\n📱 Телефон: +7 910-640 65 30")
 
+# Команда /stats
+async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_id = update.message.from_user.id
+    if user_id != ADMIN_ID:
+        await update.message.reply_text("❌ У вас нет доступа к этой команде.")
+        return
+
+    if not os.path.exists(STATS_FILE):
+        await update.message.reply_text("Статистика пока не собиралась.")
+        return
+
+    with open(STATS_FILE, "r", encoding="utf-8") as file:
+        stats = json.load(file)
+    
+    total_users = len(stats)
+    total_interactions = sum(user["total_interactions"] for user in stats.values())
+    
+    message = f"📊 Общая статистика:\n👤 Пользователей: {total_users}\n📈 Всего взаимодействий: {total_interactions}\n\n"
+    
+    for user_id, data in stats.items():
+        username = data["username"] if data["username"] else "(Нет никнейма)"
+        message += f"👤 @{username} (ID: {user_id})\n🔄 Всего действий: {data['total_interactions']}\n"
+        for action, count in data["actions"].items():
+            message += f"   🔹 {action}: {count}\n"
+        message += "\n"
+    
+    await update.message.reply_text(message)
+
 def main() -> None:
     application = Application.builder().token(
         os.environ.get("TOKEN")
