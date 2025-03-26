@@ -28,8 +28,17 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await query.message.reply_document(open(pdf_path, "rb"), caption="Презентация 300 Терм")
     
     elif query.data == "get_kp":
-        kp_path = "KP_Termokomplektov.pdf"
-        await query.message.reply_document(open(kp_path, "rb"), caption="Коммерческое предложение Термокомплектов")
+        kp_path = "KP.Termokomplektov.pdf"
+        await query.message.reply_document(open(kp_path, "rb"), caption="Коммерческое предложение ТермоКомплектов")
+    
+    elif query.data == "get_tech":
+        tech_path = "Tekhnicheskiye_usloviya.pdf"
+        await query.message.reply_document(open(tech_path, "rb"), caption="Технические условия")
+    
+    elif query.data == "contacts":
+        await query.message.reply_text(
+            "📞 Контакты:\n📧 Почта: delo@300term.ru\n📱 Телефон: +7 910-640 65 30"
+        )
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text("🏛️ Я Гермес! Бот проекта 300 Терм. Помогу вам получить нужные материалы.")
