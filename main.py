@@ -20,7 +20,7 @@ STICKER_ID = "CAACAgIAAxkBAAEN0kVn5DosnEUsvrIq3qMijI-UH06IRwAChXkAAtiRIEslui9KsG
 STATS_FILE = "bot_stats.json"
 
 # Мой Telegram ID 
-ADMIN_ID = 7622349875
+ADMIN_ID = 1059405288
 
 # Функция обновления статистики
 def update_stats(user_id, action):
