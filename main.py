@@ -12,6 +12,9 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
+# FILE_ID стикера
+STICKER_ID = "CAACAgIAAxkBAAEN0kVn5DosnEUsvrIq3qMijI-UH06IRwAChXkAAtiRIEslui9KsGyRWzYE"
+
 # Обработчик нажатия кнопок
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
@@ -25,17 +28,17 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     
     elif query.data == "get_presentation":
         pdf_path = "Present_300term.pdf"
-        await query.message.reply_text("Одну секунду... Загружаю")
+        await query.message.reply_text("⏳ Одну секунду... Загружаю")
         await query.message.reply_document(open(pdf_path, "rb"), caption="Презентация 300 Терм")
     
     elif query.data == "get_kp":
         kp_path = "KP_Termokomplektov.pdf"
-        await query.message.reply_text("Одну секунду... Загружаю")
+        await query.message.reply_text("⏳ Одну секунду... Загружаю")
         await query.message.reply_document(open(kp_path, "rb"), caption="Коммерческое предложение ТермоКомплектов")
     
     elif query.data == "get_tech":
         tech_path = "Tekhnicheskiye_usloviya.pdf"
-        await query.message.reply_text("Одну секунду... Загружаю")
+        await query.message.reply_text("⏳ Одну секунду... Загружаю")
         await query.message.reply_document(open(tech_path, "rb"), caption="Технические условия")
     
     elif query.data == "contacts":
@@ -44,6 +47,8 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         )
     
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_sticker(STICKER_ID)
+    await asyncio.sleep(1)
     await update.message.reply_text("🏛️ Я Гермес! Бот проекта 300 Терм. Помогу вам получить нужные материалы.")
     await asyncio.sleep(2)
     keyboard = [
