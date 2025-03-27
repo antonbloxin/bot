@@ -160,7 +160,6 @@ def main() -> None:
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("stats", stats))
     application.add_handler(CommandHandler("broadcast", broadcast))
-    application.add_handler(CommandHandler("delete", delete))
     application.add_handler(CallbackQueryHandler(button))
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
